@@ -101,7 +101,7 @@ If you want to instantiate several time a class that inherits from InputBase and
 
 ```cpp
 struct SeveralInstance : InputBase<SeveralInstance> {
-    void uNetRead(int a) {
+    void uStreamRead(int a) {
 
     }
 }
