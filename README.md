@@ -113,3 +113,7 @@ SeveralInstance B;
 
 USTREAM_INPUT_COUNT(SeveralInstance, 2)
 ```
+If you try to send a signal that is not mapped to any class, the compiler will throw a warning like so :
+```cpp
+warning: static bool ustream::InputList<id>::unknown_stream::s_uStreamWrite(const data_t& ...) is deprecated [-Wdeprecated-declarations]
+```
