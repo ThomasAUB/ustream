@@ -124,3 +124,54 @@ If you try to emit on a stream that is not mapped to any input, the compiler wil
 ```cpp
 warning: static bool ustream::InputList<id>::unknown_stream::s_uStreamWrite(const data_t& ...) ...
 ```
+
+# Real life example
+
+If you want to develop a FW containing a switch object with a HW abstraction layer, you can use uStream to access HW resources and map these resources according to your platform.
+```cpp
+
+#include "ustream_output.h
+
+struct Switch {
+
+    Switch(uint16_t inID) : kID(inID) {}
+
+    enum class eStreams {
+        ePin,
+        eSwitchEvent
+    };
+    
+    struct Event {
+        const uint16_t kID;
+        bool mSwitchState;
+    };
+
+    void scan() {
+    
+        bool ioVal = false;
+        
+        ustream::read<eStreams::ePin>(kID, ioVal);
+        
+        if(ioVal != mPrevState) {
+            // send event
+            ustream::write<eStreams::eSwitchEvent>(Event{kID, ioVal});
+            // update state
+            mPrevState = ioVal;
+        }
+        
+    }
+    
+private:
+    const uint16_t kID;
+    bool mPrevState = false;
+};
+```
+
+```cpp
+// HW dependent resource mapping
+#include "ustream_router.h"
+#include "switch.h"
+
+USTREAM_SET_INPUT(Switch::eStreams::ePin, GPIOMgr)
+USTREAM_SET_INPUT(Switch::eStreams::eEvent, View)
+```
