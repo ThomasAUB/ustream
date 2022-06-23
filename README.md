@@ -130,7 +130,7 @@ warning: static bool ustream::InputList<id>::unknown_stream::s_uStreamWrite(cons
 If you want to develop a FW containing a switch object with a HW abstraction layer, you can use uStream to access HW resources and map these resources according to your platform.
 ```cpp
 
-#include "ustream_output.h
+#include "ustream_output.h"
 
 struct Switch {
 
