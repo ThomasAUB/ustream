@@ -56,19 +56,26 @@ int main() {
     // instantiate stream input
     MyInput mi;
 
-    // enable the input
-    // note : by default, the input is attached on instantiation
-    mi.attach();
-
     // send an integer rvalue
     ustream::write<eMyStreams::eStream1>(5, 8, 6);
 
     float f = 0.0;
 
     // send a float lvalue
-    ustream::read<eMyStreams::eStream1>(f);
+    if(ustream::read<eMyStreams::eStream1>(f)) {
+        // f is now equal to 5.48
+    }
+    
+    // disable the input
+    // note : by default, the input is attached on instantiation
+    mi.detach();
 
-    // f is now equal to 5.48
+    f = 0.0;
+        
+    bool r = ustream::read<eMyStreams::eStream1>(f);
+   
+    // r is false because the input is detached
+    // f equals zero because the read didn't succeed
 
 }
 ```
