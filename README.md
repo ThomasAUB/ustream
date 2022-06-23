@@ -57,7 +57,7 @@ int main() {
     MyInput mi;
 
     // enable the input
-    // note : we could have put this line inside the constructor of "MyInput"
+    // note : by default, the input is attached on instantiation
     mi.attach();
 
     // send an integer rvalue
@@ -101,7 +101,7 @@ If you want to instantiate several time a class that inherits from InputBase and
 
 ```cpp
 struct SeveralInstance : InputBase<SeveralInstance> {
-    void uStreamRead(int a) {
+    void uStreamWrite(int a) {
 
     }
 }
