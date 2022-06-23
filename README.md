@@ -120,7 +120,7 @@ SeveralInstance B;
 
 USTREAM_INPUT_COUNT(SeveralInstance, 2)
 ```
-If you try to emit on a stream that is not mapped to any input, the compiler will throw a warning like so :
+If you try to emit on a stream that is not mapped to any input, the compiler will throw a warning that looks something like this :
 ```cpp
 warning: static bool ustream::InputList<id>::unknown_stream::s_uStreamWrite(const data_t& ...) ...
 ```
