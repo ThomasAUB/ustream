@@ -44,7 +44,7 @@ private:
     template<bool is_mutable, typename return_t, typename ... args_t>
     static auto rw(bool &ioSuccess, bool inWrite = false, return_t (*inFunc)(args_t...) = nullptr) {
 
-        auto stub = [](args_t...) { return return_t(); };
+        static constexpr auto stub = [](args_t...) { return return_t(); };
 
         using f_t = return_t(*)(args_t...);
 
@@ -81,13 +81,6 @@ struct Socket {
         return (*mFunc)(args...);
     }
 
-    bool detach() {
-        if constexpr (is_mutable) {
-            mFunc = &stub;
-        }
-        return is_mutable;
-    }
-
     template<auto id>
     void attach() {
         mFunc = Channel<id>::template get<is_mutable, return_t, args_t...>();
@@ -97,19 +90,17 @@ struct Socket {
     bool exists() {
         return
             (
-                (mFunc != &stub) &&
+                (mFunc != const_cast<function_t>(&stub)) &&
                 Channel<id>::template exists<is_mutable, return_t, args_t...>()
             );
     }
 
 private:
 
+    static constexpr return_t(*stub)(args_t...) = [](args_t...) { return return_t(); };
+
     using function_t = return_t(**)(args_t...);
-
-    static constexpr return_t(*_)(args_t...) = [](args_t...) { return return_t(); };
-    static inline return_t(*stub)(args_t...) = _;
-
-    function_t mFunc = &stub;
+    function_t mFunc = const_cast<function_t>(&stub);
 
 };
 
