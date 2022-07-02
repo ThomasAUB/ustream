@@ -2,9 +2,10 @@
 
 #include <type_traits>
 
+namespace ustream {
 
 template<auto id>
-struct Stream {
+struct Channel {
 
     template<typename return_t, typename ... args_t>
     static bool setImmutable(return_t (*inFunc)(args_t...)) {
@@ -89,15 +90,16 @@ struct Socket {
 
     template<auto id>
     void attach() {
-        mFunc = Stream<id>::template get<is_mutable, return_t, args_t...>();
+        mFunc = Channel<id>::template get<is_mutable, return_t, args_t...>();
     }
 
     template<auto id>
     bool exists() {
-        return  (
-                    (mFunc != &stub) &&
-                    Stream<id>::template exists<is_mutable, return_t, args_t...>()
-                );
+        return
+            (
+                (mFunc != &stub) &&
+                Channel<id>::template exists<is_mutable, return_t, args_t...>()
+            );
     }
 
 private:
@@ -117,3 +119,4 @@ using ImmutableSocket = Socket<false, return_t, args_t...>;
 template<typename return_t, typename ... args_t>
 using MutableSocket = Socket<true, return_t, args_t...>;
 
+}
