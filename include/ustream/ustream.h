@@ -9,73 +9,60 @@ struct Channel {
 
     template<typename return_t, typename ... args_t>
     static bool setImmutable(return_t (*inFunc)(args_t...)) {
-        return FuncContainer<return_t, args_t...>::set(inFunc, false);
+
+        using fc_t = FuncContainer<return_t, args_t...>;
+
+        if (fc_t::sIsMutable || fc_t::sFunction == fc_t::stub) {
+            fc_t::sIsMutable = false;
+            fc_t::sFunction = inFunc;
+            return true;
+        } else {
+            // write attempt on an already set immutable
+            return false;
+        }
+
     }
 
     template<typename return_t, typename ... args_t>
     static void setMutable(return_t (*inFunc)(args_t...)) {
-        FuncContainer<return_t, args_t...>::set(inFunc, true);
+
+        using fc_t = FuncContainer<return_t, args_t...>;
+
+        if (fc_t::sIsMutable) {
+            fc_t::sFunction = inFunc;
+        }
     }
 
     template<typename return_t, typename ... args_t>
     static auto get() {
-        return FuncContainer<return_t, args_t...>::get();
+        return &FuncContainer<return_t, args_t...>::sFunction;
     }
 
     template<typename return_t, typename ... args_t>
     static bool erase() {
-        return FuncContainer<return_t, args_t...>::erase();
+
+        using fc_t = FuncContainer<return_t, args_t...>;
+
+        if(fc_t::sIsMutable) {
+            fc_t::sFunction = fc_t::stub;
+        }
+        return fc_t::sIsMutable;
     }
 
     template<typename return_t, typename ... args_t>
     static bool exists() {
-        return FuncContainer<return_t, args_t...>::exists();
+        using fc_t = FuncContainer<return_t, args_t...>;
+        return (fc_t::sFunction != fc_t::stub);
     }
 
 private:
 
     template<typename return_t, typename ... args_t>
     struct FuncContainer {
-
         static constexpr auto stub = [](args_t...) { return return_t(); };
-
-        using f_t = return_t(*)(args_t...);
-
-        static inline f_t sFunction = stub;
-
-        static bool set(f_t inFunc, bool inIsMutable) {
-
-            if (sIsMutable || sFunction == stub) {
-                sIsMutable = inIsMutable;
-                sFunction = inFunc;
-                return true;
-            } else {
-                // write attempt on an already set immutable
-                return false;
-            }
-        }
-
-        static bool erase() {
-            if(sIsMutable) {
-                sFunction = stub;
-            }
-            return sIsMutable;
-        }
-
-        static auto get() {
-            return &sFunction;
-        }
-
-        static bool exists() {
-            return (sFunction != stub);
-        }
-
-    private:
-
-        static inline bool sIsMutable;
-
+        static inline return_t(*sFunction)(args_t...)  = stub;
+        static inline bool sIsMutable = true;
     };
-
 
 };
 
