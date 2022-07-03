@@ -10,11 +10,11 @@ struct Channel {
     template<typename return_t, typename ... args_t>
     static bool setImmutable(return_t (*inFunc)(args_t...)) {
 
-        using fc_t = FuncContainer<return_t, args_t...>;
+        using c_t = Caller<return_t, args_t...>;
 
-        if (fc_t::sIsMutable || fc_t::sFunction == fc_t::stub) {
-            fc_t::sIsMutable = false;
-            fc_t::sFunction = inFunc;
+        if (c_t::sIsMutable || c_t::sFunction == c_t::stub) {
+            c_t::sIsMutable = false;
+            c_t::sFunction = inFunc;
             return true;
         } else {
             // write attempt on an already set immutable
@@ -26,39 +26,39 @@ struct Channel {
     template<typename return_t, typename ... args_t>
     static void setMutable(return_t (*inFunc)(args_t...)) {
 
-        using fc_t = FuncContainer<return_t, args_t...>;
+        using c_t = Caller<return_t, args_t...>;
 
-        if (fc_t::sIsMutable) {
-            fc_t::sFunction = inFunc;
+        if (c_t::sIsMutable) {
+            c_t::sFunction = inFunc;
         }
     }
 
     template<typename return_t, typename ... args_t>
     static auto get() {
-        return &FuncContainer<return_t, args_t...>::sFunction;
+        return &Caller<return_t, args_t...>::sFunction;
     }
 
     template<typename return_t, typename ... args_t>
     static bool erase() {
 
-        using fc_t = FuncContainer<return_t, args_t...>;
+        using c_t = Caller<return_t, args_t...>;
 
-        if(fc_t::sIsMutable) {
-            fc_t::sFunction = fc_t::stub;
+        if(c_t::sIsMutable) {
+            c_t::sFunction = c_t::stub;
         }
-        return fc_t::sIsMutable;
+        return c_t::sIsMutable;
     }
 
     template<typename return_t, typename ... args_t>
     static bool exists() {
-        using fc_t = FuncContainer<return_t, args_t...>;
-        return (fc_t::sFunction != fc_t::stub);
+        using c_t = Caller<return_t, args_t...>;
+        return (c_t::sFunction != c_t::stub);
     }
 
 private:
 
     template<typename return_t, typename ... args_t>
-    struct FuncContainer {
+    struct Caller {
         static constexpr auto stub = [](args_t...) { return return_t(); };
         static inline return_t(*sFunction)(args_t...)  = stub;
         static inline bool sIsMutable = true;
