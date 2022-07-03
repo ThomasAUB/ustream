@@ -66,7 +66,8 @@ int main() {
     // send data on the stream
     socket1(MyArgType1());
 
-    // instantiate a socket returning bool and taking const MyArgType1 and MyArgType2& in argument
+    // instantiate a socket returning bool and taking const MyArgType1 and 
+    // MyArgType2& in argument
     ustream::Socket<bool, const MyArgType1, MyArgType2&> socket2;
 
     // attach the socket to eMyStreams::eStream
