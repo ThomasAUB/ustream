@@ -1,12 +1,12 @@
 # uStream
 
 uStream is an abstraction tool for communications.
-It uses ID to differentiate streams, a stream can support multiple sources, multiple destinations and multiple types.
+It uses ID to differentiate streams, a stream can support multiple sources and multiple types.
 A destination can be connected and disconnected from a stream.
 
 ## How to
 
-First, you'll have to define at least one stream ID.
+First, you'll have to define at least one stream ID
 
 Example :
 
@@ -17,161 +17,67 @@ enum class eMyStreams {
 };
 ```
 
-Then you can create a class designed to receive a stream.
-Once instantiated, the object is **attached**, you can call the **attach()/detach()** functions to enable/disable the stream reception.
+Then you can define free or static functions to receive the streams
 
 ```cpp
-#include "ustream_input.h"
+struct MyArgType1 {/**/};
+struct MyArgType2 {/**/};
 
-struct MyInput : ustream::InputBase<MyInput> {
+struct RX1 {
 
-    void uStreamWrite(int a, int b, int c) {
-        // do something
+    static bool input(MyArgType1) {
+        /**/
     }
 
-    void uStreamRead(float& d) {
-        d = 5.48;
+};
+
+struct RX2 {
+
+    template<typename T>
+    static bool process(const MyArgType1, T&) {
+        /**/
     }
 
 };
 ```
 
-Now it's time to associate this class to the stream somewhere in your code.
-Note that you can add as many inputs you want in this macro
+Now it's time to associate this class to the stream somewhere in your code
 
 ```cpp
-#include "ustream_router.h"
+// a mutable stream can be changed afterwards
+ustream::Channel<eMyStreams::eStream1>::setMutable(&RX1::input);
 
-USTREAM_SET_INPUT(eMyStreams::eStream1, MyInput)
+// an immutable can't be changed afterwards
+ustream::Channel<eMyStreams::eStream2>::setImmutable(&RX2::process<MyArgType2>);
 ```
 
-Now, you can start to send data on the stream.
-Note that you can send any type you want as long as the inputs are able to receive them.
+Now, you can start to use the stream
 
 ```cpp
-#include "ustream_output.h"
+#include "ustream.h"
 
 int main() {
 
-    // instantiate stream input
-    MyInput mi;
+    // instantiate a socket returning bool and taking MyArgType1 in argument
+    ustream::Socket<bool, MyArgType1> socket1;
 
-    // send an integer rvalue
-    ustream::write<eMyStreams::eStream1>(5, 8, 6);
+    // attach the socket to eMyStreams::eStream1
+    socket1.attach<eMyStreams::eStream1>();
 
-    float f = 0.0;
+    // send data on the stream
+    socket1(MyArgType1());
 
-    // send a float lvalue
-    if(ustream::read<eMyStreams::eStream1>(f)) {
-        // f is now equal to 5.48
-    }
-    
-    // disable the input
-    // note : by default, the input is attached on instantiation
-    mi.detach();
+    // instantiate a socket returning bool and taking const MyArgType1 and MyArgType2& in argument
+    ustream::Socket<bool, const MyArgType1, MyArgType2&> socket2;
 
-    f = 0.0;
-        
-    bool r = ustream::read<eMyStreams::eStream1>(f);
-   
-    // r is false because the input is detached
-    // f equals zero because the read didn't succeed
+    // attach the socket to eMyStreams::eStream2
+    socket2.attach<eMyStreams::eStream2>();
 
+    MyArgType2 arg;
+
+    // send data on the stream
+    socket2(MyArgType1(), arg);
+
+    return 0;
 }
-```
-
-It's also possible to receive a stream in a static constexpr function, in that case you don't have to inherit from InputBase and the function will always be attached.
-
-```cpp
-struct MyInput {
-
-    static constexpr bool s_uStreamRead(int& d) {
-        d = 66;
-        return true;
-    }
-
-};
-```
-
-Example check :
-```cpp
-static constexpr int getCTValue() {
-    int a = 0;
-    ustream::read<eMyStreams::eStream1>(a);
-    return a;
-}
-
-static_assert(getCTValue() == 66, "Compile-time read fail");
-```
-If you want to instantiate several time a class that inherits from InputBase and be able to attach and detach them independently, you'll have to explicitely declare the number of instances.
-
-
-```cpp
-struct SeveralInstance : InputBase<SeveralInstance> {
-    void uStreamWrite(int a) {
-
-    }
-}
-SeveralInstance A;
-SeveralInstance B;
-```
-```cpp
-#include "ustream_input.h"
-
-USTREAM_INPUT_COUNT(SeveralInstance, 2)
-```
-If you try to emit on a stream that is not mapped to any input, the compiler will throw a warning that looks something like this :
-```cpp
-warning: static bool ustream::InputList<id>::unknown_stream::s_uStreamWrite(const data_t& ...) ...
-```
-
-# Real life example
-
-If you want to develop a FW containing a switch object with a HW abstraction layer, you can use uStream to access HW resources and map these resources according to your platform.
-```cpp
-
-#include "ustream_output.h"
-
-struct Switch {
-
-    Switch(uint16_t inID) : kID(inID) {}
-
-    enum class eStreams {
-        ePin,
-        eSwitchEvent
-    };
-    
-    struct Event {
-        const uint16_t kID;
-        bool mSwitchState;
-    };
-
-    void scan() {
-    
-        bool ioVal = false;
-        
-        ustream::read<eStreams::ePin>(kID, ioVal);
-        
-        if(ioVal != mPrevState) {
-            // send event
-            ustream::write<eStreams::eSwitchEvent>(Event{kID, ioVal});
-            // update state
-            mPrevState = ioVal;
-        }
-        
-    }
-    
-private:
-    const uint16_t kID;
-    bool mPrevState = false;
-};
-```
-
-```cpp
-// HW dependent resource mapping
-#include "ustream_router.h"
-#include "switch.h"
-
-USTREAM_SET_INPUT(Switch::eStreams::ePin, GPIOMgr)
-USTREAM_SET_INPUT(Switch::eStreams::eEvent, View)
 ```
