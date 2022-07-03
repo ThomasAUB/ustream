@@ -12,8 +12,7 @@ Example :
 
 ```cpp
 enum class eMyStreams {
-    eStream1,
-    eStream2
+    eStream
 };
 ```
 
@@ -41,14 +40,14 @@ struct RX2 {
 };
 ```
 
-Now it's time to associate this class to the stream somewhere in your code
+Now it's time to associate this class to the stream somewhere in your code. A mutable stream can be changed afterwards and an immutable can't. You can set several function on the same stream as long as the prototype is not the same
 
 ```cpp
-// a mutable stream can be changed afterwards
-ustream::Channel<eMyStreams::eStream1>::setMutable(&RX1::input);
+// set RX1::input as the mutable function called on MyStreams::eStream
+ustream::Channel<eMyStreams::eStream>::setMutable(&RX1::input);
 
-// an immutable can't be changed afterwards
-ustream::Channel<eMyStreams::eStream2>::setImmutable(&RX2::process<MyArgType2>);
+// set RX1::input as the immutable function called on MyStreams::eStream
+ustream::Channel<eMyStreams::eStream>::setImmutable(&RX2::process<MyArgType2>);
 ```
 
 Now, you can start to use the stream
@@ -61,8 +60,8 @@ int main() {
     // instantiate a socket returning bool and taking MyArgType1 in argument
     ustream::Socket<bool, MyArgType1> socket1;
 
-    // attach the socket to eMyStreams::eStream1
-    socket1.attach<eMyStreams::eStream1>();
+    // attach the socket to eMyStreams::eStream
+    socket1.attach<eMyStreams::eStream>();
 
     // send data on the stream
     socket1(MyArgType1());
@@ -70,8 +69,8 @@ int main() {
     // instantiate a socket returning bool and taking const MyArgType1 and MyArgType2& in argument
     ustream::Socket<bool, const MyArgType1, MyArgType2&> socket2;
 
-    // attach the socket to eMyStreams::eStream2
-    socket2.attach<eMyStreams::eStream2>();
+    // attach the socket to eMyStreams::eStream
+    socket2.attach<eMyStreams::eStream>();
 
     MyArgType2 arg;
 
