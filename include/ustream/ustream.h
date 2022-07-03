@@ -1,6 +1,5 @@
 #pragma once
 
-#include <type_traits>
 
 namespace ustream {
 
@@ -8,52 +7,19 @@ template<auto id>
 struct Channel {
 
     template<typename return_t, typename ... args_t>
-    static bool setImmutable(return_t (*inFunc)(args_t...)) {
-
-        using c_t = Caller<return_t, args_t...>;
-
-        if (c_t::sIsMutable || c_t::sFunction == c_t::stub) {
-            c_t::sIsMutable = false;
-            c_t::sFunction = inFunc;
-            return true;
-        } else {
-            // write attempt on an already set immutable
-            return false;
-        }
-
-    }
+    static bool setImmutable(return_t (*inFunc)(args_t...));
 
     template<typename return_t, typename ... args_t>
-    static void setMutable(return_t (*inFunc)(args_t...)) {
-
-        using c_t = Caller<return_t, args_t...>;
-
-        if (c_t::sIsMutable) {
-            c_t::sFunction = inFunc;
-        }
-    }
+    static bool setMutable(return_t (*inFunc)(args_t...));
 
     template<typename return_t, typename ... args_t>
-    static auto get() {
-        return &Caller<return_t, args_t...>::sFunction;
-    }
+    static auto get();
 
     template<typename return_t, typename ... args_t>
-    static bool erase() {
-
-        using c_t = Caller<return_t, args_t...>;
-
-        if(c_t::sIsMutable) {
-            c_t::sFunction = c_t::stub;
-        }
-        return c_t::sIsMutable;
-    }
+    static bool erase();
 
     template<typename return_t, typename ... args_t>
-    static bool exists() {
-        using c_t = Caller<return_t, args_t...>;
-        return (c_t::sFunction != c_t::stub);
-    }
+    static bool exists();
 
 private:
 
@@ -65,6 +31,63 @@ private:
     };
 
 };
+
+
+template<auto id>
+template<typename return_t, typename ... args_t>
+bool Channel<id>::setImmutable(return_t (*inFunc)(args_t...)) {
+
+    using c_t = Caller<return_t, args_t...>;
+
+    if (c_t::sIsMutable || c_t::sFunction == c_t::stub) {
+        c_t::sIsMutable = false;
+        c_t::sFunction = inFunc;
+        return true;
+    } else {
+        // write attempt on an already set immutable
+        return false;
+    }
+
+}
+
+template<auto id>
+template<typename return_t, typename ... args_t>
+bool Channel<id>::setMutable(return_t (*inFunc)(args_t...)) {
+
+    using c_t = Caller<return_t, args_t...>;
+
+    if (c_t::sIsMutable) {
+        c_t::sFunction = inFunc;
+    }
+    return c_t::sIsMutable;
+}
+
+template<auto id>
+template<typename return_t, typename ... args_t>
+auto Channel<id>::get() {
+    return &Caller<return_t, args_t...>::sFunction;
+}
+
+template<auto id>
+template<typename return_t, typename ... args_t>
+bool Channel<id>::erase() {
+
+    using c_t = Caller<return_t, args_t...>;
+
+    if(c_t::sIsMutable) {
+        c_t::sFunction = c_t::stub;
+    }
+    return c_t::sIsMutable;
+}
+
+template<auto id>
+template<typename return_t, typename ... args_t>
+bool Channel<id>::exists() {
+    using c_t = Caller<return_t, args_t...>;
+    return (c_t::sFunction != c_t::stub);
+}
+
+
 
 
 template<typename return_t, typename... args_t>
