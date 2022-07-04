@@ -34,10 +34,10 @@ template<auto id>
 struct Channel {
 
     template<typename return_t, typename ... args_t>
-    static bool setImmutable(return_t (*inFunc)(args_t...));
+    static bool setImmutable(return_t(*inFunc)(args_t...));
 
     template<typename return_t, typename ... args_t>
-    static bool setMutable(return_t (*inFunc)(args_t...));
+    static bool setMutable(return_t(*inFunc)(args_t...));
 
     template<typename return_t, typename ... args_t>
     static auto get();
@@ -91,7 +91,7 @@ private:
 
 template<auto id>
 template<typename return_t, typename ... args_t>
-bool Channel<id>::setImmutable(return_t (*inFunc)(args_t...)) {
+bool Channel<id>::setImmutable(return_t(*inFunc)(args_t...)) {
 
     using c_t = Caller<return_t, args_t...>;
 
@@ -108,7 +108,7 @@ bool Channel<id>::setImmutable(return_t (*inFunc)(args_t...)) {
 
 template<auto id>
 template<typename return_t, typename ... args_t>
-bool Channel<id>::setMutable(return_t (*inFunc)(args_t...)) {
+bool Channel<id>::setMutable(return_t(*inFunc)(args_t...)) {
 
     using c_t = Caller<return_t, args_t...>;
 
