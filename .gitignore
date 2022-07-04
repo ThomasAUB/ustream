@@ -1,0 +1,6 @@
+
+*.dblite
+
+build/release/test/test
+
+*.o
