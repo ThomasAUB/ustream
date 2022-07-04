@@ -1,5 +1,4 @@
-[![Build Status](https://travis-ci.com/ThomasAUB/uStream.svg?branch=master)](https://travis-ci.com/ThomasAUB/uStream)
-
+[![Build Status](https://app.travis-ci.com/ThomasAUB/uStream.svg)](https://travis-ci.com/ThomasAUB/uStream)
 
 # uStream
 
