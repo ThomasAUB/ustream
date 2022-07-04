@@ -70,7 +70,6 @@ struct Socket<return_t(args_t...)> {
     template<auto id>
     void attach();
 
-    template<auto id>
     void detach();
 
     template<auto id>
@@ -157,7 +156,6 @@ void Socket<return_t(args_t...)>::attach() {
 }
 
 template<typename return_t, typename... args_t>
-template<auto id>
 void Socket<return_t(args_t...)>::detach() {
     mFunc = const_cast<function_t>(&stub);
 }
