@@ -45,10 +45,10 @@ struct RX2 {
 Now it's time to associate this class to the stream somewhere in your code. A mutable stream can be changed afterwards and an immutable can't. You can set several functions on the same stream as long as the prototypes are not the same
 
 ```cpp
-// set RX1::input as a mutable function called on MyStreams::eStream
+// set RX1::input as the mutable function called on MyStreams::eStream
 ustream::Channel<eMyStreams::eStream>::setMutable(&RX1::input);
 
-// set RX2::process as an immutable function called on MyStreams::eStream
+// set RX1::input as the immutable function called on MyStreams::eStream
 ustream::Channel<eMyStreams::eStream>::setImmutable(&RX2::process<MyArgType2>);
 ```
 
@@ -82,4 +82,35 @@ int main() {
 
     return 0;
 }
+```
+
+It's also possible to send callbacks on a stream
+
+```cpp
+static void asyncProcess(int i, void(*inCallback)(int)) {
+    /*...*/
+    inCallback(42); 
+}
+```
+
+```cpp
+// instantiate socket
+ustream::Socket<void(int, void(*)(int))> asyncSocket;
+
+/*...*/
+asyncSocket.attach<eMyStreams::eStream>();
+
+ustream::Channel<eMyStreams::eStream>::setMutable(asyncProcess);
+/*...*/
+
+// use the socket with a lambda expression callback
+asyncSocket(5, [](int inResult) 
+{
+    if(inResult == 42) {
+        /*...*/
+    }
+}
+
+);
+
 ```
