@@ -1,6 +1,6 @@
 # uStream
 
-uStream is an abstraction tool for communications.
+uStream is a lightweight dependency injection tool meant for microcontrollers.
 It uses ID to differentiate streams, a stream can support multiple sources and multiple types.
 A destination can be connected and disconnected from a stream.
 
