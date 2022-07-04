@@ -42,7 +42,7 @@ struct RX2 {
 };
 ```
 
-Now it's time to associate this class to the stream somewhere in your code. A mutable stream can be changed afterwards and an immutable can't. You can set several function on the same stream as long as the prototype is not the same
+Now it's time to associate this class to the stream somewhere in your code. A mutable stream can be changed afterwards and an immutable can't. You can set several functions on the same stream as long as the prototypes are not the same
 
 ```cpp
 // set RX1::input as the mutable function called on MyStreams::eStream
