@@ -1,3 +1,6 @@
+[![Build Status](https://travis-ci.com/ThomasAUB/uStream.svg?branch=master)](https://travis-ci.com/ThomasAUB/uStream)
+
+
 # uStream
 
 uStream is a lightweight dependency injection tool meant for microcontrollers.
