@@ -114,3 +114,49 @@ asyncSocket(5, [](int inResult)
 );
 
 ```
+
+The main interest of the Socket object is to attach out of the scope of usage, if the ID of a channel is known in the scope of usage, you can use the call function
+```cpp
+static void receive(int i) {
+    /*...*/
+}
+
+#include "ustream.h"
+void init() {
+    // attach a function tot the stream somewhere in the code
+    ustream::Channel<eMyStreams::eStream>::setMutable(receive);
+}
+```
+#include "ustream.h"
+
+int main() {
+    // calls the "receive" function
+    ustream::Channel<eMyStreams::eStream>::call(456);
+}
+```
+It's possible to change the channel function at run time if declared as mutable
+```cpp
+static void receive2(int i) {
+    /*...*/
+}
+static void receive1(int i) {
+    /*...*/
+    ustream::Channel<eMyStreams::eStream>::setMutable(receive2);
+}
+
+#include "ustream.h"
+void init() {
+    // attach a function tot the stream somewhere in the code
+    ustream::Channel<eMyStreams::eStream>::setMutable(receive1);
+}
+```
+#include "ustream.h"
+
+int main() {
+    // calls the "receive1" function
+    ustream::Channel<eMyStreams::eStream>::call(456);
+    
+    // calls the "receive2" function
+    ustream::Channel<eMyStreams::eStream>::call(456);
+}
+```
