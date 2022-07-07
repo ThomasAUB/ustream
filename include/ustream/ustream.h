@@ -42,6 +42,9 @@ struct Channel {
     template<typename return_t, typename ... args_t>
     static auto call(args_t... args);
 
+    template<typename ... args_t>
+    static void call(args_t... args);
+
     template<typename return_t, typename ... args_t>
     static auto get();
 
@@ -123,8 +126,13 @@ bool Channel<id>::setMutable(return_t(*inFunc)(args_t...)) {
 template<auto id>
 template<typename return_t, typename ... args_t>
 auto Channel<id>::call(args_t... args) {
-    using c_t = Caller<return_t, args_t...>;
-    return c_t::sFunction(args...);
+    return Caller<return_t, args_t...>::sFunction(args...);
+}
+
+template<auto id>
+template<typename ... args_t>
+void Channel<id>::call(args_t... args) {
+    Caller<void, args_t...>::sFunction(args...);
 }
 
 template<auto id>
