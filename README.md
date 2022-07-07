@@ -127,6 +127,7 @@ void init() {
     ustream::Channel<eMyStreams::eStream>::setMutable(receive);
 }
 ```
+```cpp
 #include "ustream.h"
 
 int main() {
@@ -150,6 +151,7 @@ void init() {
     ustream::Channel<eMyStreams::eStream>::setMutable(receive1);
 }
 ```
+```cpp
 #include "ustream.h"
 
 int main() {
