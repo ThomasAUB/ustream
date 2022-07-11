@@ -92,6 +92,12 @@ class BasicTest : public CppUnit::TestFixture {
 
             multiply_socket.template attach<eStreams::eBasicTest>();
 
+            // should fail if we try to set a nullptr function
+            CPPUNIT_ASSERT(!ustream::Channel<eStreams::eBasicTest>::setMutable(nullptr));
+
+            // should fail if we try to set a nullptr function
+            CPPUNIT_ASSERT(!ustream::Channel<eStreams::eBasicTest>::setImmutable(nullptr));
+
             CPPUNIT_ASSERT(ustream::Channel<eStreams::eBasicTest>::setMutable(BasicTest::multiply_by_2));
 
             multiply_socket(5, 
