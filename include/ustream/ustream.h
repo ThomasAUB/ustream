@@ -100,12 +100,12 @@ bool Channel<id>::setImmutable(return_t(*inFunc)(args_t...)) {
 
     using c_t = Caller<return_t, args_t...>;
 
-    if (c_t::sIsMutable || c_t::sFunction == c_t::stub) {
+    if ((c_t::sIsMutable || c_t::sFunction == c_t::stub) && inFunc) {
         c_t::sIsMutable = false;
         c_t::sFunction = inFunc;
         return true;
     } else {
-        // write attempt on an already set immutable
+        // write attempt on an already set immutable or inFunc is null
         return false;
     }
 
@@ -117,10 +117,12 @@ bool Channel<id>::setMutable(return_t(*inFunc)(args_t...)) {
 
     using c_t = Caller<return_t, args_t...>;
 
-    if (c_t::sIsMutable) {
+    if (c_t::sIsMutable && inFunc) {
         c_t::sFunction = inFunc;
+        return true;
     }
-    return c_t::sIsMutable;
+    // caller is immutable or inFunc is null
+    return false;
 }
 
 template<auto id>
