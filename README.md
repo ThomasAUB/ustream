@@ -1,4 +1,5 @@
 [![Build Status](https://app.travis-ci.com/ThomasAUB/uStream.svg)](https://travis-ci.com/ThomasAUB/uStream)
+[![License](https://img.shields.io/github/license/ThomasAUB/uStream.svg)](LICENSE)
 
 # uStream
 
