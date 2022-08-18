@@ -5,6 +5,7 @@
 #include <cppunit/TestFixture.h>
 
 #include "../include/ustream/ustream.h"
+#include "../include/ustream/socket.h"
 #include "streams.h"
 
 class BasicTest : public CppUnit::TestFixture { 
