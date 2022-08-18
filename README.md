@@ -57,6 +57,7 @@ Now, you can start to use the stream
 
 ```cpp
 #include "ustream.h"
+#include "socket.h"
 
 int main() {
 
