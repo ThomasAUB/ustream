@@ -27,7 +27,7 @@
 
 #pragma once
 
-#include "ustream.h"
+#include "ustream/ustream.h"
 
 namespace ustream {
 
