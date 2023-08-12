@@ -60,7 +60,8 @@ Now, you can start to use the stream
 
 int main() {
 
-    // call the stream that takes 'MyArgType1' in argument and returns bool : calls RX1::input function
+    // call the stream that takes 'MyArgType1' in argument and returns bool : 
+    // calls RX1::input function
     bool result1 = ustream::Channel<eMyStreams::eStream>::call<bool, MyArgType1>(MyArgType1());
 
 
