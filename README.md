@@ -66,8 +66,13 @@ int main() {
 
     MyArgType2 arg;
 
-    // call the stream that takes 'MyArgType1' and 'MyArgType2&' in argument and returns bool : calls RX2::process<MyArgType2> function
-    bool result2 = ustream::Channel<eMyStreams::eStream>::call<bool, MyArgType1, MyArgType2&>(MyArgType1(), arg);
+    // call the stream that takes 'MyArgType1' and 'MyArgType2&' in argument and returns bool : 
+    // calls RX2::process<MyArgType2> function
+    bool result2 = ustream::Channel<eMyStreams::eStream>::call<
+        bool, 
+        MyArgType1, 
+        MyArgType2&
+    >(MyArgType1(), arg);
 
 
     return 0;
