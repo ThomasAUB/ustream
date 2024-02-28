@@ -2,12 +2,12 @@
 
 #include <utility>
 #include "function_ref.hpp"
-#include "ull.h"
+#include "ulink.hpp"
 
 namespace ustream {
 
     template<typename ... args_t>
-    class Slot : public ull::Node<Slot<args_t...>> {
+    class Slot : public ulink::Node<Slot<args_t...>> {
         using f_t = tl::function_ref<void(args_t...)>;
     public:
 
@@ -34,7 +34,7 @@ namespace ustream {
             static void broadcast(args_t&&... args);
 
         private:
-            inline static ull::List<Slot<args_t...>> sSlots;
+            inline static ulink::List<Slot<args_t...>> sSlots;
         };
 
     }

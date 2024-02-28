@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ustream_slot.hpp"
-#include "ull.h"
+#include "ulink.hpp"
 
 namespace ustream {
 
@@ -13,7 +13,7 @@ namespace ustream {
         void emit(args_t&& ... args);
 
     private:
-        ull::List<Slot<args_t...>> mSlots;
+        ulink::List<Slot<args_t...>> mSlots;
     };
 
 

@@ -44,7 +44,6 @@ TEST_CASE("basic uStream tests") {
     CHECK(receivedData2 == 753);
 
     int receivedData3 = 0;
-
     {
         ustream::Slot<int> slot3(
             [&] (int i) {
