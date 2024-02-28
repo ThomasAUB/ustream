@@ -13,8 +13,8 @@ set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
 
     add_subdirectory(tests)
 
-    # add_test(ull_tests  ull_tests)
+    # add_test(ustream_tests  ull_tests)
     
-    # add_test(NAME ullTests COMMAND $<TARGET_FILE:tests/tests.cpp>)
+    # add_test(NAME ustreamTests COMMAND $<TARGET_FILE:tests/tests.cpp>)
     
 # endif()
