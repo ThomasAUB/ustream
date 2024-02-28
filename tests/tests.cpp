@@ -3,10 +3,9 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include "doctest.h"
 
-//#include "ustream/.h"
-
 #include "ustream_slot.hpp"
 #include "ustream_signal.hpp"
+#include "ustream_broadcast.hpp"
 
 TEST_CASE("basic uStream tests") {
 
@@ -66,6 +65,38 @@ TEST_CASE("basic uStream tests") {
     CHECK(receivedData2 == 951);
     CHECK(receivedData3 == 789);
 
-    CHECK(true);
+    slot1.template open<44>();
+
+    ustream::broadcast<44>(12);
+
+    CHECK(receivedData1 == 12);
+    CHECK(receivedData2 == 951);
+    CHECK(receivedData3 == 789);
+
+    // the slot shouldn't open as it's already connected to a signal
+    CHECK(!slot2.template open<44>());
+
+    ustream::broadcast<44>(452);
+
+    CHECK(receivedData1 == 452);
+    CHECK(receivedData2 == 951);
+    CHECK(receivedData3 == 789);
+
+    slot2.close();
+    CHECK(slot2.template open<44>());
+
+    ustream::broadcast<44>(956);
+
+    CHECK(receivedData1 == 956);
+    CHECK(receivedData2 == 956);
+    CHECK(receivedData3 == 789);
+
+    // this should have no effect
+    sig.emit(123);
+
+    CHECK(receivedData1 == 956);
+    CHECK(receivedData2 == 956);
+    CHECK(receivedData3 == 789);
+
 }
 

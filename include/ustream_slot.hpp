@@ -6,55 +6,77 @@
 
 namespace ustream {
 
-    // forward declaration
-    template<auto address, typename ... args_t>
-    struct Server;
-
     template<typename ... args_t>
     class Slot : public ull::Node<Slot<args_t...>> {
         using f_t = tl::function_ref<void(args_t...)>;
     public:
 
-        Slot(f_t&& f) :
-            mFunction(f) {}
+        Slot(f_t&& f);
 
-        void operator()(args_t&&... args) {
-            mFunction(std::forward<args_t>(args)...);
-        }
+        void operator()(args_t&&... args);
 
         template<auto address>
-        bool open() {
-            if (this->isLinked()) {
-                return false;
-            }
-            Server<address, args_t...>::add(*this);
-            return true;
-        }
+        bool open();
 
-        void close() {
-            this->remove();
-        }
+        void close();
 
     private:
         f_t mFunction;
     };
 
+    namespace detail {
 
-    template<auto address, typename ... args_t>
-    struct Server {
+        template<auto address, typename ... args_t>
+        struct Server {
 
-        void add(Slot<args_t...>& n) {
-            sList.push_front(n);
+            static void addPublicSlot(Slot<args_t...>& n);
+
+            static void broadcast(args_t&&... args);
+
+        private:
+            inline static ull::List<Slot<args_t...>> sSlots;
+        };
+
+    }
+
+    template<typename ... args_t>
+    Slot<args_t...>::Slot(f_t&& f) :
+        mFunction(f) {}
+
+    template<typename ... args_t>
+    void Slot<args_t...>::operator()(args_t&&... args) {
+        mFunction(std::forward<args_t>(args)...);
+    }
+
+    template<typename ... args_t>
+    template<auto address>
+    bool Slot<args_t...>::open() {
+        if (this->isLinked()) {
+            return false;
+        }
+        detail::Server<address, args_t...>::addPublicSlot(*this);
+        return true;
+    }
+
+    template<typename ... args_t>
+    void Slot<args_t...>::close() {
+        this->remove();
+    }
+
+    namespace detail {
+
+        template<auto address, typename ... args_t>
+        void Server<address, args_t...>::addPublicSlot(Slot<args_t...>& s) {
+            sSlots.push_front(s);
         }
 
-        void broadcast(args_t&... args) {
-            for (auto& n : sList) {
-                n(std::forward<args_t>(args)...);
+        template<auto address, typename ... args_t>
+        void Server<address, args_t...>::broadcast(args_t&&... args) {
+            for (auto& s : sSlots) {
+                s(std::forward<args_t>(args)...);
             }
         }
 
-    private:
-        inline static ull::List<Slot<args_t...>> sList;
-    };
+    }
 
 }
