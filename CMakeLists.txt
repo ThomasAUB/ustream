@@ -3,6 +3,7 @@ project(uStream VERSION 0.0.1 LANGUAGES CXX)    # Create project
 set(CMAKE_CXX_STANDARD 17)                  # Enable c++17 standard
 
 include_directories(${CMAKE_SOURCE_DIR}/include)
+include_directories(${CMAKE_SOURCE_DIR}/uLink/include)
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})

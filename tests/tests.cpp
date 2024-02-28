@@ -5,10 +5,67 @@
 
 //#include "ustream/.h"
 
+#include "ustream_slot.hpp"
+#include "ustream_signal.hpp"
 
 TEST_CASE("basic uStream tests") {
 
-    CHECK(true);
+    ustream::Signal<int> sig;
 
+    int receivedData1 = 0;
+    ustream::Slot<int> slot1(
+        [&] (int i) {
+            receivedData1 = i;
+        }
+    );
+
+    sig.emit(42);
+    CHECK(receivedData1 == 0);
+    sig.connect(slot1);
+
+    sig.emit(42);
+    CHECK(receivedData1 == 42);
+
+    int receivedData2 = 0;
+    ustream::Slot<int> slot2(
+        [&] (int i) {
+            receivedData2 = i;
+        }
+    );
+
+    sig.connect(slot2);
+
+    sig.emit(75);
+    CHECK(receivedData1 == 75);
+    CHECK(receivedData2 == 75);
+
+    slot1.close();
+    sig.emit(753);
+    CHECK(receivedData1 == 75);
+    CHECK(receivedData2 == 753);
+
+    int receivedData3 = 0;
+
+    {
+        ustream::Slot<int> slot3(
+            [&] (int i) {
+                receivedData3 = i;
+            }
+        );
+
+        sig.connect(slot3);
+
+        sig.emit(789);
+        CHECK(receivedData1 == 75);
+        CHECK(receivedData2 == 789);
+        CHECK(receivedData3 == 789);
+    }
+
+    sig.emit(951);
+    CHECK(receivedData1 == 75);
+    CHECK(receivedData2 == 951);
+    CHECK(receivedData3 == 789);
+
+    CHECK(true);
 }
 
