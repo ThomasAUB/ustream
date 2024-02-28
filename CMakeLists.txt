@@ -8,6 +8,10 @@ include_directories(${CMAKE_SOURCE_DIR}/uLink/include)
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
 
+execute_process(COMMAND ${GIT_EXECUTABLE} submodule update --init --recursive
+                        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+                        RESULT_VARIABLE GIT_SUBMOD_RESULT)
+
 # if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
 
     enable_testing()
