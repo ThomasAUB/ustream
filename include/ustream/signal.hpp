@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ustream_slot.hpp"
+#include "islot.hpp"
 #include "ulink.hpp"
 
 namespace ustream {
@@ -8,24 +8,24 @@ namespace ustream {
     template<typename ... args_t>
     struct Signal {
 
-        void connect(Slot<args_t...>& inSlot);
+        void connect(ISlot<args_t...>& inSlot);
 
         void emit(args_t&& ... args);
 
     private:
-        ulink::List<Slot<args_t...>> mSlots;
+        ulink::List<ISlot<args_t...>> mSlots;
     };
 
 
     template<typename ... args_t>
-    void Signal<args_t...>::connect(Slot<args_t...>& inSlot) {
+    void Signal<args_t...>::connect(ISlot<args_t...>& inSlot) {
         mSlots.push_front(inSlot);
     }
 
     template<typename ... args_t>
     void Signal<args_t...>::emit(args_t&& ... args) {
         for (auto& s : mSlots) {
-            s(std::forward<args_t>(args)...);
+            s.slotInput(std::forward<args_t>(args)...);
         }
     }
 

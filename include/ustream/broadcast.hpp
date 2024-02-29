@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ustream_slot.hpp"
+#include "islot.hpp"
 #include <utility>
 
 namespace ustream {

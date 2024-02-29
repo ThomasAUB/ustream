@@ -3,20 +3,24 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include "doctest.h"
 
-#include "ustream_slot.hpp"
-#include "ustream_signal.hpp"
-#include "ustream_broadcast.hpp"
+#include "ustream/islot.hpp"
+#include "ustream/signal.hpp"
+#include "ustream/broadcast.hpp"
 
 TEST_CASE("basic uStream tests") {
 
     ustream::Signal<int> sig;
 
-    int receivedData1 = 0;
-    ustream::Slot<int> slot1(
-        [&] (int i) {
-            receivedData1 = i;
+    struct Slot : ustream::ISlot<int> {
+        Slot(int& d) :mData(d) {}
+        void slotInput(int i) override {
+            mData = i;
         }
-    );
+        int& mData;
+    };
+
+    int receivedData1 = 0;
+    Slot slot1(receivedData1);
 
     sig.emit(42);
     CHECK(receivedData1 == 0);
@@ -25,12 +29,8 @@ TEST_CASE("basic uStream tests") {
     sig.emit(42);
     CHECK(receivedData1 == 42);
 
-    int receivedData2 = 0;
-    ustream::Slot<int> slot2(
-        [&] (int i) {
-            receivedData2 = i;
-        }
-    );
+    int receivedData2;
+    Slot slot2(receivedData2);
 
     sig.connect(slot2);
 
@@ -45,11 +45,7 @@ TEST_CASE("basic uStream tests") {
 
     int receivedData3 = 0;
     {
-        ustream::Slot<int> slot3(
-            [&] (int i) {
-                receivedData3 = i;
-            }
-        );
+        Slot slot3(receivedData3);
 
         sig.connect(slot3);
 
