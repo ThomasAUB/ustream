@@ -144,6 +144,8 @@ int main() {
 }
 ```
 
+## Note
+
 If a slot that has been connected is deleted, it will automatically remove itself
 from its signal.
 
@@ -154,7 +156,7 @@ void foo() {
 } // the slot disconnects itself here
 ```
 
-### Limitations
+## Limitations
 
 A slot can be connected to only one source whether it be a signal or a broadcast address. Here are the design choices that were made:
 
