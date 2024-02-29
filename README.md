@@ -109,7 +109,7 @@ Result :
 12 received in slot 2
 ```
 
-As the values are passed by reference, it's possible to modify the value on the fly if the slots are
+As the values are passed by reference, it's possible to modify the value on the fly.
 
 ```cpp
 #include "ustream/islot.hpp"
@@ -143,3 +143,21 @@ int main() {
     return 0;
 }
 ```
+
+If a slot that has been connected is deleted, it will automatically remove itself
+from its signal.
+
+```cpp
+void foo() {
+    Slot s;
+    someSignal.connect(s);
+} // the slot disconnects itself here
+```
+
+### Limitations
+
+A slot can be connected to only one source whether it be a signal or a broadcast address. Here are the design choices that were made:
+
+- If a slot is connected to a signal or a broadcast address, connecting it to another **signal** will disconnect it from the previous source.
+
+- If a slot is connected to a signal or a broadcast address, connecting it to another **broadcast address** will fail and return false.
