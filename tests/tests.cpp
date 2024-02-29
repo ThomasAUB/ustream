@@ -38,7 +38,7 @@ TEST_CASE("basic uStream tests") {
     CHECK(receivedData1 == 75);
     CHECK(receivedData2 == 75);
 
-    slot1.close();
+    slot1.disconnect();
     sig.emit(753);
     CHECK(receivedData1 == 75);
     CHECK(receivedData2 == 753);
@@ -77,7 +77,7 @@ TEST_CASE("basic uStream tests") {
     CHECK(receivedData2 == 951);
     CHECK(receivedData3 == 789);
 
-    slot2.close();
+    slot2.disconnect();
     CHECK(ustream::open<44>(slot2));
 
     ustream::broadcast<44>(956);
