@@ -29,9 +29,9 @@ namespace ustream {
         template<auto address, typename ... args_t>
         struct Server {
 
-            static void addPublicSlot(Slot<args_t...>& n);
+            static void connect(Slot<args_t...>& n);
 
-            static void broadcast(args_t&&... args);
+            static void emit(args_t&&... args);
 
         private:
             inline static ulink::List<Slot<args_t...>> sSlots;
@@ -54,7 +54,7 @@ namespace ustream {
         if (this->isLinked()) {
             return false;
         }
-        detail::Server<address, args_t...>::addPublicSlot(*this);
+        detail::Server<address, args_t...>::connect(*this);
         return true;
     }
 
@@ -66,12 +66,12 @@ namespace ustream {
     namespace detail {
 
         template<auto address, typename ... args_t>
-        void Server<address, args_t...>::addPublicSlot(Slot<args_t...>& s) {
+        void Server<address, args_t...>::connect(Slot<args_t...>& s) {
             sSlots.push_front(s);
         }
 
         template<auto address, typename ... args_t>
-        void Server<address, args_t...>::broadcast(args_t&&... args) {
+        void Server<address, args_t...>::emit(args_t&&... args) {
             for (auto& s : sSlots) {
                 s(std::forward<args_t>(args)...);
             }
