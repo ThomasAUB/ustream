@@ -60,7 +60,7 @@ TEST_CASE("basic uStream tests") {
     CHECK(receivedData2 == 951);
     CHECK(receivedData3 == 789);
 
-    slot1.template open<44>();
+    ustream::open<44>(slot1);
 
     ustream::broadcast<44>(12);
 
@@ -69,7 +69,7 @@ TEST_CASE("basic uStream tests") {
     CHECK(receivedData3 == 789);
 
     // the slot shouldn't open as it's already connected to a signal
-    CHECK(!slot2.template open<44>());
+    CHECK(!ustream::open<44>(slot2));
 
     ustream::broadcast<44>(452);
 
@@ -78,7 +78,7 @@ TEST_CASE("basic uStream tests") {
     CHECK(receivedData3 == 789);
 
     slot2.close();
-    CHECK(slot2.template open<44>());
+    CHECK(ustream::open<44>(slot2));
 
     ustream::broadcast<44>(956);
 
