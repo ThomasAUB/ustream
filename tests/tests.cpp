@@ -12,86 +12,77 @@ TEST_CASE("basic uStream tests") {
     ustream::Signal<int> sig;
 
     struct Slot : ustream::ISlot<int> {
-        Slot(int& d) :mData(d) {}
         void processSignal(int i) override {
-            mData = i;
+            mRXData = i;
         }
-        int& mData;
+        int mRXData = 0;
     };
 
-    int receivedData1 = 0;
-    Slot slot1(receivedData1);
+    Slot slot1;
 
     sig.emit(42);
-    CHECK(receivedData1 == 0);
+    CHECK(slot1.mRXData == 0);
     sig.connect(slot1);
 
     sig.emit(42);
-    CHECK(receivedData1 == 42);
+    CHECK(slot1.mRXData == 42);
 
-    int receivedData2;
-    Slot slot2(receivedData2);
+    Slot slot2;
 
     sig.connect(slot2);
 
     sig.emit(75);
-    CHECK(receivedData1 == 75);
-    CHECK(receivedData2 == 75);
+    CHECK(slot1.mRXData == 75);
+    CHECK(slot2.mRXData == 75);
 
     slot1.disconnect();
     sig.emit(753);
-    CHECK(receivedData1 == 75);
-    CHECK(receivedData2 == 753);
+    CHECK(slot1.mRXData == 75);
+    CHECK(slot2.mRXData == 753);
 
-    int receivedData3 = 0;
     {
-        Slot slot3(receivedData3);
+        Slot slot3;
 
         sig.connect(slot3);
 
         sig.emit(789);
-        CHECK(receivedData1 == 75);
-        CHECK(receivedData2 == 789);
-        CHECK(receivedData3 == 789);
+        CHECK(slot1.mRXData == 75);
+        CHECK(slot2.mRXData == 789);
+        CHECK(slot3.mRXData == 789);
     }
 
     sig.emit(951);
-    CHECK(receivedData1 == 75);
-    CHECK(receivedData2 == 951);
-    CHECK(receivedData3 == 789);
+    CHECK(slot1.mRXData == 75);
+    CHECK(slot2.mRXData == 951);
 
     ustream::open<44>(slot1);
 
     ustream::broadcast<44>(12);
 
-    CHECK(receivedData1 == 12);
-    CHECK(receivedData2 == 951);
-    CHECK(receivedData3 == 789);
+    CHECK(slot1.mRXData == 12);
+    CHECK(slot2.mRXData == 951);
 
     // the slot shouldn't open as it's already connected to a signal
     CHECK(!ustream::open<44>(slot2));
 
     ustream::broadcast<44>(452);
 
-    CHECK(receivedData1 == 452);
-    CHECK(receivedData2 == 951);
-    CHECK(receivedData3 == 789);
+    CHECK(slot1.mRXData == 452);
+    CHECK(slot2.mRXData == 951);
 
     slot2.disconnect();
     CHECK(ustream::open<44>(slot2));
 
     ustream::broadcast<44>(956);
 
-    CHECK(receivedData1 == 956);
-    CHECK(receivedData2 == 956);
-    CHECK(receivedData3 == 789);
+    CHECK(slot1.mRXData == 956);
+    CHECK(slot2.mRXData == 956);
 
     // this should have no effect
     sig.emit(123);
 
-    CHECK(receivedData1 == 956);
-    CHECK(receivedData2 == 956);
-    CHECK(receivedData3 == 789);
+    CHECK(slot1.mRXData == 956);
+    CHECK(slot2.mRXData == 956);
 
 }
 
