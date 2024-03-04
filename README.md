@@ -17,7 +17,7 @@ struct Slot : ustream::ISlot<int> {
 
     Slot(int inID) : mID(inID) {}
 
-    void slotInput(int i) override {
+    void processSignal(int i) override {
         std::cout << i << " received in slot " << mID << std::endl;
     }
 
@@ -66,7 +66,7 @@ struct Slot : ustream::ISlot<int> {
 
     Slot(int inID) : mID(inID) {}
 
-    void slotInput(int i) override {
+    void processSignal(int i) override {
         std::cout << i << " received in slot " << mID << std::endl;
     }
 
@@ -158,8 +158,5 @@ void foo() {
 
 ## Limitations
 
-A slot can be connected to only one source whether it be a signal or a broadcast address. Here are the design choices that were made:
-
-- If a slot is connected to a signal or a broadcast address, connecting it to another **signal** will disconnect it from the previous source.
-
-- If a slot is connected to a signal or a broadcast address, connecting it to another **broadcast address** will fail and return false.
+A slot can be connected to only one source whether it be a signal or a broadcast address.
+If a slot is connected to a signal or a broadcast address, connecting it to another **signal** or broadcast address will fail and return false.

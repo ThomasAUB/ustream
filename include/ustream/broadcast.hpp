@@ -27,54 +27,62 @@
 
 #pragma once
 
-#include "islot.hpp"
+#include "signal.hpp"
 #include <utility>
 
 namespace ustream {
 
+    /**
+     * @brief Open a slot at the given address.
+     *
+     * @tparam address Signal address.
+     * @tparam args_t Argument types.
+     * @param s Slot to connect.
+     * @return true if the connection succeeded
+     * @return false otherwise.
+     */
     template<auto address, typename ... args_t>
     bool open(ISlot<args_t...>& s);
 
+    /**
+     * @brief Close a slot.
+     *
+     * @tparam args_t Argument types.
+     * @param s Slot to close.
+     */
     template<typename ... args_t>
     void close(ISlot<args_t...>& s);
 
+    /**
+     * @brief Broadcast data at a given address.
+     *
+     * @tparam address Broadcast address.
+     * @tparam args_t Argument types.
+     * @param args Data to broadcast.
+     * @return true if at least one slot is connected.
+     * @return false otherwise.
+     */
     template<auto address, typename ... args_t>
-    void broadcast(args_t... args);
-
+    bool broadcast(args_t... args);
 
     namespace detail {
 
         template<auto address, typename ... args_t>
-        struct Server {
-
-            static void connect(ISlot<args_t...>& s) {
-                sSlots.push_front(s);
-            }
-
-            static void emit(args_t&&... args) {
-                for (auto& s : sSlots) {
-                    s.slotInput(std::forward<args_t>(args)...);
-                }
-            }
-
-        private:
-            thread_local inline static ulink::List<ISlot<args_t...>> sSlots;
-        };
+        Signal<args_t...>& getSignal() {
+            thread_local static Signal<args_t...> sSignal;
+            return sSignal;
+        }
 
     }
 
     template<auto address, typename ... args_t>
-    void broadcast(args_t... args) {
-        detail::Server<address, args_t...>::emit(std::forward<args_t>(args)...);
+    bool broadcast(args_t... args) {
+        return detail::getSignal<address, args_t...>().emit(std::forward<args_t>(args)...);
     }
 
     template<auto address, typename ... args_t>
     bool open(ISlot<args_t...>& s) {
-        if (s.isLinked()) {
-            return false;
-        }
-        detail::Server<address, args_t...>::connect(s);
-        return true;
+        return detail::getSignal<address, args_t...>().connect(s);
     }
 
     template<typename ... args_t>

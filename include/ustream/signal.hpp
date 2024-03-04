@@ -34,9 +34,23 @@ namespace ustream {
     template<typename ... args_t>
     struct Signal {
 
-        void connect(ISlot<args_t...>& inSlot);
+        /**
+         * @brief Connects a slot to this signal.
+         *
+         * @param inSlot Slot to connect.
+         * @return true if the connection succeeded
+         * @return false otherwise.
+         */
+        bool connect(ISlot<args_t...>& inSlot);
 
-        void emit(args_t&& ... args);
+        /**
+         * @brief Emits data to the connected slots.
+         *
+         * @param args data to emit.
+         * @return true if at least one slot is connected
+         * @return false otherwise.
+         */
+        bool emit(args_t&& ... args);
 
     private:
         ulink::List<ISlot<args_t...>> mSlots;
@@ -44,15 +58,23 @@ namespace ustream {
 
 
     template<typename ... args_t>
-    void Signal<args_t...>::connect(ISlot<args_t...>& inSlot) {
+    bool Signal<args_t...>::connect(ISlot<args_t...>& inSlot) {
+        if (inSlot.isLinked()) {
+            return false;
+        }
         mSlots.push_front(inSlot);
+        return true;
     }
 
     template<typename ... args_t>
-    void Signal<args_t...>::emit(args_t&& ... args) {
-        for (auto& s : mSlots) {
-            s.slotInput(std::forward<args_t>(args)...);
+    bool Signal<args_t...>::emit(args_t&& ... args) {
+        if (mSlots.empty()) {
+            return false;
         }
+        for (auto& s : mSlots) {
+            s.processSignal(std::forward<args_t>(args)...);
+        }
+        return true;
     }
 
 }

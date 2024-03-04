@@ -34,9 +34,17 @@ namespace ustream {
     template<typename ... args_t>
     struct ISlot : ulink::Node<ISlot<args_t...>> {
 
+        /**
+         * @brief Disconnects this slot.
+         */
         void disconnect() { this->remove(); }
 
-        virtual void slotInput(args_t... args) = 0;
+        /**
+         * @brief Called when a connected signal emits data.
+         *
+         * @param args Signal argument(s).
+         */
+        virtual void processSignal(args_t... args) = 0;
 
     };
 

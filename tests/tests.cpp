@@ -13,7 +13,7 @@ TEST_CASE("basic uStream tests") {
 
     struct Slot : ustream::ISlot<int> {
         Slot(int& d) :mData(d) {}
-        void slotInput(int i) override {
+        void processSignal(int i) override {
             mData = i;
         }
         int& mData;
