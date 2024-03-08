@@ -40,6 +40,14 @@ namespace ustream {
         void disconnect() { this->remove(); }
 
         /**
+         * @brief Tells if this slot is connected to a signal or broadcast port.
+         *
+         * @return true if this slot is connected
+         * @return false otherwise.
+         */
+        bool isConnected() const { this->isLinked(); }
+
+        /**
          * @brief Called when a connected signal emits data.
          *
          * @param args Signal argument(s).

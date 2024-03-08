@@ -50,7 +50,15 @@ namespace ustream {
          * @return true if at least one slot is connected
          * @return false otherwise.
          */
-        bool emit(args_t&& ... args);
+        void emit(args_t&& ... args);
+
+        /**
+         * @brief Tells if this signal is connected to at least one slot.
+         *
+         * @return true if this signal is connected
+         * @return false otherwise.
+         */
+        bool isConnected() const;
 
     private:
         ulink::List<ISlot<args_t...>> mSlots;
@@ -67,14 +75,15 @@ namespace ustream {
     }
 
     template<typename ... args_t>
-    bool Signal<args_t...>::emit(args_t&& ... args) {
-        if (mSlots.empty()) {
-            return false;
-        }
+    void Signal<args_t...>::emit(args_t&& ... args) {
         for (auto& s : mSlots) {
             s.processSignal(std::forward<args_t>(args)...);
         }
-        return true;
+    }
+
+    template<typename ... args_t>
+    bool Signal<args_t...>::isConnected() const {
+        return mSlots.empty();
     }
 
 }
