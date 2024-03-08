@@ -93,9 +93,9 @@ int main() {
     ustream::open<ePorts::B>(slot2);
     ustream::open<ePorts::B>(slot3);
 
-    ustream::broadcast<A>(74); // emit to slot1
+    ustream::broadcast<ePorts::A>(74); // emit to slot1
 
-    ustream::broadcast<B>(12); // emit to slot2 and slot3
+    ustream::broadcast<ePorts::B>(12); // emit to slot2 and slot3
 
     return 0;
 }
@@ -117,7 +117,7 @@ As the values are passed by reference, it's possible to modify the value on the 
 
 // slot definition
 struct Slot : ustream::ISlot<int&> {
-    void slotInput(int& i) override {
+    void processSignal(int& i) override {
         std::cout << i++ << std::endl;
     }
 };
