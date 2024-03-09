@@ -77,7 +77,9 @@ namespace ustream {
 
     template<auto address, typename ... args_t>
     bool broadcast(args_t... args) {
-        return detail::getSignal<address, args_t...>().emit(std::forward<args_t>(args)...);
+        return detail::getSignal<address, args_t...>().emit(
+            std::forward<args_t>(args)...
+        );
     }
 
     template<auto address, typename ... args_t>
