@@ -1,5 +1,5 @@
-cmake_minimum_required(VERSION 3.27)            # CMake version check
-project(uStream VERSION 0.0.1 LANGUAGES CXX)    # Create project
+cmake_minimum_required(VERSION 3.22)            # CMake version check
+project(ustream VERSION 0.0.1 LANGUAGES CXX)    # Create project
 set(CMAKE_CXX_STANDARD 17)                      # Enable c++17 standard
 
 
@@ -25,7 +25,7 @@ endif()
 
 
 include_directories(${CMAKE_SOURCE_DIR}/include)
-include_directories(${CMAKE_SOURCE_DIR}/uLink/include)
+include_directories(${CMAKE_SOURCE_DIR}/ulink/include)
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
