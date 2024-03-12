@@ -1,7 +1,7 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * MIT License                                                                     *
  *                                                                                 *
- * Copyright (c) 2022 Thomas AUBERT                                                *
+ * Copyright (c) 2024 Thomas AUBERT                                                *
  *                                                                                 *
  * Permission is hereby granted, free of charge, to any person obtaining a copy    *
  * of this software and associated documentation files (the "Software"), to deal   *
@@ -21,68 +21,72 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE   *
  * SOFTWARE.                                                                       *
  *                                                                                 *
- * github : https://github.com/ThomasAUB/uStream                                   *
+ * github : https://github.com/ThomasAUB/ustream                                   *
  *                                                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #pragma once
 
-#include "ustream.h"
+#include "signal.hpp"
 
 namespace ustream {
 
-template<typename return_t, typename... args_t>
-struct Socket;
+    /**
+     * @brief Open a slot at the given address.
+     *
+     * @tparam address Signal address.
+     * @tparam args_t Argument types.
+     * @param s Slot to connect.
+     * @return true if the connection succeeded
+     * @return false otherwise.
+     */
+    template<auto address, typename ... args_t>
+    bool open(ISlot<args_t...>& s);
 
-template<typename return_t, typename... args_t>
-struct Socket<return_t(args_t...)> {
+    /**
+     * @brief Close a slot.
+     *
+     * @tparam args_t Argument types.
+     * @param s Slot to close.
+     */
+    template<typename ... args_t>
+    void close(ISlot<args_t...>& s);
 
-    inline return_t operator()(args_t ... args) const;
+    /**
+     * @brief Broadcast data at a given address.
+     *
+     * @tparam address Broadcast address.
+     * @tparam args_t Argument types.
+     * @param args Data to broadcast.
+     * @return true if at least one slot is connected.
+     * @return false otherwise.
+     */
+    template<auto address, typename ... args_t>
+    void broadcast(args_t... args);
 
-    template<auto id>
-    void attach();
+    namespace detail {
 
-    void detach();
+        template<auto address, typename ... args_t>
+        Signal<args_t...>& getSignal() {
+            thread_local static Signal<args_t...> sSignal;
+            return sSignal;
+        }
 
-    template<auto id>
-    bool exists();
+    }
 
-private:
+    template<auto address, typename ... args_t>
+    void broadcast(args_t... args) {
+        detail::getSignal<address, args_t...>().emit(args...);
+    }
 
-    static constexpr return_t(*stub)(args_t...) = [](args_t...) { return return_t(); };
+    template<auto address, typename ... args_t>
+    bool open(ISlot<args_t...>& s) {
+        return detail::getSignal<address, args_t...>().connect(s);
+    }
 
-    using function_t = return_t(**)(args_t...);
-    function_t mFunc = const_cast<function_t>(&stub);
-
-};
-
-template<typename return_t, typename... args_t>
-return_t Socket<return_t(args_t...)>::operator()(args_t ... args) const {
-    return (*mFunc)(args...);
-}
-
-template<typename return_t, typename... args_t>
-template<auto id>
-void Socket<return_t(args_t...)>::attach() {
-    mFunc = Channel<id>::template get<return_t, args_t...>();
-}
-
-template<typename return_t, typename... args_t>
-void Socket<return_t(args_t...)>::detach() {
-    mFunc = const_cast<function_t>(&stub);
-}
-
-template<typename return_t, typename... args_t>
-template<auto id>
-bool Socket<return_t(args_t...)>::exists() {
-    return
-        (
-            (mFunc != const_cast<function_t>(&stub)) &&
-            Channel<id>::template exists<return_t, args_t...>()
-        );
-}
-
-
-
+    template<typename ... args_t>
+    void close(ISlot<args_t...>& s) {
+        s.disconnect();
+    }
 
 }

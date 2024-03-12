@@ -1,188 +1,162 @@
-[![Build Status](https://app.travis-ci.com/ThomasAUB/uStream.svg)](https://travis-ci.com/ThomasAUB/uStream)
-[![License](https://img.shields.io/github/license/ThomasAUB/uStream.svg)](LICENSE)
+![build status](https://github.com/ThomasAUB/uStream/actions/workflows/build.yml/badge.svg) [![License](https://img.shields.io/github/license/ThomasAUB/uStream.svg)](LICENSE)
 
 # uStream
 
-uStream is a lightweight dependency injection tool meant for microcontrollers without memory allocation.
-It uses ID to differentiate streams, a stream can support multiple sources and multiple types.
-A destination can be connected and disconnected from a stream at runtime.
+Lightweight signal-slot library
 
-## How to
+This library can operate in two different modes, connected and broadcast.
 
-First, you'll have to define at least one stream ID
-
-Example :
+## Connected mode
 
 ```cpp
-enum class eMyStreams {
-    eStream
-};
-```
+#include "ustream/signal.hpp"
+#include "ustream/islot.hpp"
 
-Then you can define free or static functions to receive the streams
+// slot definition
+struct Slot : ustream::ISlot<int> {
 
-```cpp
-struct MyArgType1 {/**/};
-struct MyArgType2 {/**/};
+    Slot(int inID) : mID(inID) {}
 
-struct RX1 {
-
-    static bool input(MyArgType1) {
-        /**/
+    void processSignal(int i) override {
+        std::cout << i << " received in slot " << mID << std::endl;
     }
 
+private:
+    int mID;
 };
 
-struct RX2 {
+int main() {
 
-    template<typename T>
-    static bool process(const MyArgType1, T&) {
-        /**/
+    // declare a signal
+    ustream::Signal<int> signal;
+
+    // declare slots
+    Slot slot1(1);
+    Slot slot2(2);
+    Slot slot3(3);
+
+    // connect the slots to the signal
+    signal.connect(slot1);
+    signal.connect(slot2);
+    signal.connect(slot3);
+
+    // emit a value
+    signal.emit(25);
+
+    return 0;
+}
+```
+
+Result :
+
+```
+25 received in slot 3
+25 received in slot 2
+25 received in slot 1
+```
+
+## Broadcast mode
+
+```cpp
+#include "ustream/islot.hpp"
+#include "ustream/broadcast.hpp"
+
+// slot definition
+struct Slot : ustream::ISlot<int> {
+
+    Slot(int inID) : mID(inID) {}
+
+    void processSignal(int i) override {
+        std::cout << i << " received in slot " << mID << std::endl;
     }
 
+private:
+    int mID;
 };
-```
-
-Now it's time to associate this class to the stream somewhere in your code. A mutable stream can be changed afterwards and an immutable can't. You can set several functions on the same stream as long as the prototypes are not the same
-
-```cpp
-// set RX1::input as the mutable function called on MyStreams::eStream
-ustream::Channel<eMyStreams::eStream>::setMutable(&RX1::input);
-
-// set RX1::input as the immutable function called on MyStreams::eStream
-ustream::Channel<eMyStreams::eStream>::setImmutable(&RX2::process<MyArgType2>);
-```
-
-Now, you can start to use the stream
-
-```cpp
-#include "ustream.h"
 
 int main() {
 
-    // call the stream that takes 'MyArgType1' in argument and returns bool : 
-    // calls RX1::input function
-    bool result1 = ustream::Channel<eMyStreams::eStream>::call<bool, MyArgType1>(MyArgType1());
+    // declare slots
+    Slot slot1(1);
+    Slot slot2(2);
+    Slot slot3(3);
 
-
-    MyArgType2 arg;
-
-    // call the stream that takes 'MyArgType1' and 'MyArgType2&' in argument and returns bool : 
-    // calls RX2::process<MyArgType2> function
-    bool result2 = ustream::Channel<eMyStreams::eStream>::call<
-        bool, 
-        MyArgType1, 
-        MyArgType2&
-    >(MyArgType1(), arg);
-
-
-    return 0;
-}
-```
-
-Note that if there is no matching function associated to a stream, the call will fall into an empty function that will return the default value of the return type.
-
-It's also possible to send callbacks on a stream.
-
-```cpp
-static void asyncProcess(int i, void(*inCallback)(int)) {
-    /*...*/
-    inCallback(i * 10); 
-}
-
-int main() {
-
-    enum class eMyStreams {
-        eStream
+    enum class ePorts {
+        A,
+        B
     };
 
-    // attach the the function to the stream
-    ustream::Channel<eMyStreams::eStream>::setMutable(asyncProcess);
+    // open slot1 on port A
+    ustream::open<ePorts::A>(slot1);
 
-    // call the stream with a lambda expression
-    ustream::Channel<eMyStreams::eStream>::call<void, int, void(*)(int)>(
-        5, 
-        [](int inResult) {
-            
-            if(inResult == 50) {
-                std::cout << "received 50 !" << std::endl;
-            }
+    // open slot2 and slot3 on port B
+    ustream::open<ePorts::B>(slot2);
+    ustream::open<ePorts::B>(slot3);
 
-        }
-    );
+    ustream::broadcast<ePorts::A>(74); // emit to slot1
+
+    ustream::broadcast<ePorts::B>(12); // emit to slot2 and slot3
 
     return 0;
 }
 ```
 
-uStream also provides a **Socket** object to be used when the stream ID is not known in the scope of usage. 
+Result :
+
+```
+74 received in slot 1
+12 received in slot 3
+12 received in slot 2
+```
+
+As the values are passed by reference, it's possible to modify the value on the fly.
 
 ```cpp
-#include "socket.h"
+#include "ustream/islot.hpp"
+#include "ustream/broadcast.hpp"
 
-static bool input(MyArgType1) {
-    std::cout << "Arg received" << std::endl;
-    return true;
-}
-
-
-auto getSocket() {
-    
-    enum class eMyStreams {
-        eStream
-    };
-
-    // attach the stream to the input function
-    ustream::Channel<eMyStreams::eStream>::setMutable(input);
-
-    // instantiate a socket returning bool and taking MyArgType1 in argument
-    ustream::Socket<bool(MyArgType1)> socket;
-    
-    // attach the socket to eMyStreams::eStream
-    socket.attach<eMyStreams::eStream>();
-
-    return socket;
-}
+// slot definition
+struct Slot : ustream::ISlot<int&> {
+    void processSignal(int& i) override {
+        std::cout << i++ << std::endl;
+    }
+};
 
 int main() {
 
-    auto socket = getSocket();
+    // declare slots
+    Slot slot1;
+    Slot slot2;
+    Slot slot3;
 
-    bool result = socket(MyArgType1());
+    ustream::open<0>(slot1);
+    ustream::open<0>(slot2);
+    ustream::open<0>(slot3);
 
-    std::cout << result << std::endl;
-    
+    int i = 1;
+    ustream::broadcast<0, int&>(i); // prints 1, 2, 3
+
+    slot1.disconnect();
+
+    ustream::broadcast<0, int&>(i); // prints 4, 5
+
     return 0;
 }
 ```
 
+## Note
 
-It's possible to change the channel function at runtime if declared as mutable
+If a slot that has been connected is deleted, it will automatically remove itself
+from its signal.
+
 ```cpp
-#include "ustream.h"
-
-static void receive2(int i) {
-    /*...*/
-}
-
-static void receive1(int i) {
-    // redirect the stream to the 'receive2' function
-    ustream::Channel<eMyStreams::eStream>::setMutable(receive2);
-}
-
-void init() {
-    // attach a function tot the stream
-    ustream::Channel<eMyStreams::eStream>::setMutable(receive1);
-}
-
-int main() {
-
-    init();
-
-    // calls the "receive1" function
-    ustream::Channel<eMyStreams::eStream>::call(456);
-    
-    // calls the "receive2" function
-    ustream::Channel<eMyStreams::eStream>::call(456);
-}
+void foo() {
+    Slot s;
+    someSignal.connect(s);
+} // the slot disconnects itself here
 ```
+
+## Limitations
+
+A slot can be connected to only one source whether it be a signal or a broadcast address.
+If a slot is connected to a signal or a broadcast address, connecting it to another **signal** or broadcast address will fail and return false.
