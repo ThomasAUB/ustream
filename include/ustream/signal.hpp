@@ -50,7 +50,7 @@ namespace ustream {
          * @return true if at least one slot is connected
          * @return false otherwise.
          */
-        void emit(args_t&& ... args);
+        void emit(args_t... args);
 
         /**
          * @brief Tells if this signal is connected to at least one slot.
@@ -75,9 +75,9 @@ namespace ustream {
     }
 
     template<typename ... args_t>
-    void Signal<args_t...>::emit(args_t&& ... args) {
+    void Signal<args_t...>::emit(args_t ... args) {
         for (auto& s : mSlots) {
-            s.processSignal(std::forward<args_t>(args)...);
+            s.processSignal(args...);
         }
     }
 

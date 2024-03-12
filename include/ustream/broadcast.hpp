@@ -28,7 +28,6 @@
 #pragma once
 
 #include "signal.hpp"
-#include <utility>
 
 namespace ustream {
 
@@ -63,7 +62,7 @@ namespace ustream {
      * @return false otherwise.
      */
     template<auto address, typename ... args_t>
-    bool broadcast(args_t... args);
+    void broadcast(args_t... args);
 
     namespace detail {
 
@@ -76,10 +75,8 @@ namespace ustream {
     }
 
     template<auto address, typename ... args_t>
-    bool broadcast(args_t... args) {
-        return detail::getSignal<address, args_t...>().emit(
-            std::forward<args_t>(args)...
-        );
+    void broadcast(args_t... args) {
+        detail::getSignal<address, args_t...>().emit(args...);
     }
 
     template<auto address, typename ... args_t>

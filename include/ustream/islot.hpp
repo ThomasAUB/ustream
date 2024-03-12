@@ -45,7 +45,7 @@ namespace ustream {
          * @return true if this slot is connected
          * @return false otherwise.
          */
-        bool isConnected() const { this->isLinked(); }
+        bool isConnected() const { return this->isLinked(); }
 
         /**
          * @brief Called when a connected signal emits data.
