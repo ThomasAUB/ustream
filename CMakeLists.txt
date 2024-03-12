@@ -19,7 +19,7 @@ if(GIT_SUBMODULE)
     endif()
 endif()
 
-if(NOT EXISTS "${PROJECT_SOURCE_DIR}/extern/repo/CMakeLists.txt")
+if(NOT EXISTS "${PROJECT_SOURCE_DIR}/ulink/CMakeLists.txt")
     message(FATAL_ERROR "The submodules were not downloaded! GIT_SUBMODULE was turned off or failed. Please update submodules and try again.")
 endif()
 
