@@ -31,6 +31,11 @@
 
 namespace ustream {
 
+    /**
+     * @brief Slot.
+     *
+     * @tparam args_t Argument types of the signal.
+     */
     template<typename ... args_t>
     struct ISlot : ulink::Node<ISlot<args_t...>> {
 

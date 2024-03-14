@@ -31,6 +31,11 @@
 
 namespace ustream {
 
+    /**
+     * @brief Signal.
+     *
+     * @tparam args_t Argument types of the signal.
+     */
     template<typename ... args_t>
     struct Signal {
 
