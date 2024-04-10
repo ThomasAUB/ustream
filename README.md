@@ -1,4 +1,4 @@
-![build status](https://github.com/ThomasAUB/uStream/actions/workflows/build.yml/badge.svg) [![License](https://img.shields.io/github/license/ThomasAUB/uStream.svg)](LICENSE)
+![build status](https://github.com/ThomasAUB/ustream/actions/workflows/build.yml/badge.svg) [![License](https://img.shields.io/github/license/ThomasAUB/ustream)](LICENSE)
 
 # uStream
 
