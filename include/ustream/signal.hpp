@@ -65,7 +65,7 @@ namespace ustream {
          */
         bool isConnected() const;
 
-    private:
+    protected:
         ulink::List<ISlot<args_t...>> mSlots;
     };
 
