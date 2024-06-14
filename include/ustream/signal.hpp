@@ -76,6 +76,7 @@ namespace ustream {
             return false;
         }
         mSlots.push_front(inSlot);
+        inSlot.connected();
         return true;
     }
 
