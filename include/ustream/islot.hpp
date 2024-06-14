@@ -42,7 +42,10 @@ namespace ustream {
         /**
          * @brief Disconnects this slot.
          */
-        void disconnect() { this->remove(); }
+        void disconnect() {
+            ulink::Node<ISlot<args_t...>>::remove();
+            this->disconnected();
+        }
 
         /**
          * @brief Tells if this slot is connected to a signal or broadcast port.
@@ -53,11 +56,28 @@ namespace ustream {
         bool isConnected() const { return this->isLinked(); }
 
         /**
+         * @brief Called when the slot is connected.
+         */
+        virtual void connected() {}
+
+        /**
+         * @brief Called when the slot is diconnected.
+         */
+        virtual void disconnected() {}
+
+        /**
          * @brief Called when a connected signal emits data.
          *
          * @param args Signal argument(s).
          */
         virtual void processSignal(args_t... args) = 0;
+
+    private:
+
+        using ulink::Node<ISlot<args_t...>>::remove;
+
+        template<typename T>
+        friend class ulink::List;
 
     };
 
