@@ -2,7 +2,11 @@
 
 # uStream
 
-Lightweight signal-slot library
+Lightweight C++17 signal-slot library for microcontrollers.
+
+- no heap allocation
+- no slot number limitation or pre-allocation
+- platform independent
 
 This library can operate in two different modes, connected and broadcast.
 
