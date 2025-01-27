@@ -89,7 +89,7 @@ namespace ustream {
 
     template<typename ... args_t>
     bool Signal<args_t...>::isConnected() const {
-        return mSlots.empty();
+        return !mSlots.empty();
     }
 
 }
