@@ -82,7 +82,13 @@ namespace ustream {
 
     template<typename ... args_t>
     void Signal<args_t...>::emit(args_t ... args) {
-        for (auto& s : mSlots) {
+
+        auto it = mSlots.begin();
+        const auto end = mSlots.end();
+
+        while (it != end) {
+            auto& s = *it;
+            ++it;
             s.processSignal(args...);
         }
     }
