@@ -38,6 +38,8 @@ namespace ustream {
      */
     template<typename ... args_t>
     struct ISlot : ulink::Node<ISlot<args_t...>> {
+        ISlot(const ISlot&) = delete;
+        ISlot() = default;
 
         /**
          * @brief Disconnects this slot.
