@@ -29,6 +29,18 @@
 
 #include "signal.hpp"
 
+/**
+ * @brief Storage specifier of the broadcast signals.
+ *
+ * Defaults to plain static : one signal per address and type for the whole
+ * program. Define it as thread_local static (e.g.
+ * -DUSTREAM_BROADCAST_STORAGE="thread_local static") to get one signal per
+ * thread instead.
+ */
+#ifndef USTREAM_BROADCAST_STORAGE
+#define USTREAM_BROADCAST_STORAGE static
+#endif
+
 namespace ustream {
 
     /**
@@ -68,7 +80,7 @@ namespace ustream {
 
         template<auto address, typename ... args_t>
         Signal<args_t...>& getSignal() {
-            thread_local static Signal<args_t...> sSignal;
+            USTREAM_BROADCAST_STORAGE Signal<args_t...> sSignal;
             return sSignal;
         }
 

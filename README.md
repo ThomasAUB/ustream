@@ -148,10 +148,26 @@ int main() {
 }
 ```
 
+## Broadcast storage
+
+By default, each broadcast address is backed by a plain `static` signal shared by the whole
+program. It can be overridden with the `USTREAM_BROADCAST_STORAGE` compilation flag, e.g. to
+get one signal per thread :
+
+```
+-DUSTREAM_BROADCAST_STORAGE="thread_local static"
+```
+
+Note that the library itself is not thread-safe nor interrupt-safe.
+
 ## Note
 
 If a slot that has been connected is deleted, it will automatically remove itself
 from its signal.
+If a signal is deleted, it disconnects all its slots (their `disconnected()` callback is called).
+
+Slots can be connected, disconnected or deleted while a signal is emitting, including from
+their own `processSignal()` call. A slot connected during an emit only receives the next ones.
 
 ```cpp
 void foo() {

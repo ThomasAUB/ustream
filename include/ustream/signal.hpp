@@ -65,8 +65,30 @@ namespace ustream {
          */
         bool isConnected() const;
 
+        /**
+         * @brief Disconnects all the connected slots.
+         */
+        ~Signal();
+
     protected:
         ulink::List<ISlot<args_t...>> mSlots;
+
+    private:
+
+        // Placeholder linked in the slot list during emit, right after the
+        // slot being processed. Slots disconnected or destroyed by a
+        // processSignal call unlink themselves around it, so the next slot
+        // to process is always cursor.next.
+        struct Cursor : ISlot<args_t...> {
+            Cursor(std::size_t& inCount) : mCount(inCount) { mCount++; }
+            ~Cursor() { mCount--; }
+            void processSignal(args_t...) override {}
+        private:
+            std::size_t& mCount;
+        };
+
+        // number of cursors currently linked in mSlots (nested emits)
+        std::size_t mCursorCount = 0;
     };
 
 
@@ -80,22 +102,55 @@ namespace ustream {
         return true;
     }
 
+    // the cursor is a local linked in mSlots, it always unlinks itself when
+    // it goes out of scope
+#if defined(__GNUC__) && !defined(__clang__) && (__GNUC__ >= 12)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdangling-pointer"
+#endif
+
     template<typename ... args_t>
     void Signal<args_t...>::emit(args_t ... args) {
 
-        auto it = mSlots.begin();
-        const auto end = mSlots.end();
+        using iterator = typename ulink::List<ISlot<args_t...>>::iterator;
 
-        while (it != end) {
+        // slots connected during emit are pushed front, before the cursor,
+        // so they are not processed by this emit
+        Cursor cursor(mCursorCount);
+        mSlots.push_front(cursor);
+
+        iterator it(&cursor);
+
+        while (++it != mSlots.end()) {
             auto& s = *it;
-            ++it;
+            mSlots.insert_after(it, cursor);
+            // cursors of nested emits are processed as no-op
             s.processSignal(args...);
+            it = iterator(&cursor);
         }
     }
 
+#if defined(__GNUC__) && !defined(__clang__) && (__GNUC__ >= 12)
+#pragma GCC diagnostic pop
+#endif
+
     template<typename ... args_t>
     bool Signal<args_t...>::isConnected() const {
-        return !mSlots.empty();
+        // true if the list holds more nodes than the emit cursors
+        std::size_t count = 0;
+        for (auto it = mSlots.begin(); it != mSlots.end(); ++it) {
+            if (++count > mCursorCount) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    template<typename ... args_t>
+    Signal<args_t...>::~Signal() {
+        while (!mSlots.empty()) {
+            mSlots.front().disconnect();
+        }
     }
 
 }
