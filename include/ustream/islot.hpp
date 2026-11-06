@@ -28,6 +28,7 @@
 #pragma once
 
 #include "ulink.hpp"
+#include "../../ucall/include/ucall.hpp"
 
 namespace ustream {
 
@@ -66,11 +67,39 @@ namespace ustream {
         virtual void disconnected() {}
 
         /**
-         * @brief Called when a connected signal emits data.
+         * @brief Handler invocation when a connected signal emits data.
          *
-         * @param args Signal argument(s).
+         * The library no longer uses a virtual function for signal delivery.
+         * Instead a small, in-place callable is stored (from the ucall submodule)
+         * and invoked here. This avoids virtual dispatch and reduces code size
+         * on embedded targets.
          */
-        virtual void processSignal(args_t... args) = 0;
+        void processSignal(args_t... args) {
+            if (mHandler) {
+                mHandler(std::forward<args_t>(args)...);
+            }
+        }
+
+        /**
+         * @brief Set the handler callable for this slot.
+         *
+         * Accepts any callable compatible with void(args_t...). The callable is
+         * stored in-place using `ucall::Callable` to avoid dynamic allocations.
+         */
+        template<typename F>
+        void setHandler(F&& f) {
+            mHandler = ucall::Callable<void(args_t...)>(std::forward<F>(f));
+        }
+
+        /**
+         * @brief Clear the current handler.
+         */
+        void clearHandler() { mHandler = ucall::Callable<void(args_t...)>(); }
+
+        /**
+         * @brief Tests if a handler is set.
+         */
+        bool hasHandler() const { return static_cast<bool>(mHandler); }
 
     private:
 
@@ -78,6 +107,8 @@ namespace ustream {
 
         template<typename T>
         friend class ulink::List;
+
+        ucall::Callable<void(args_t...)> mHandler;
 
     };
 

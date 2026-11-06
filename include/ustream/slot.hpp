@@ -49,63 +49,26 @@ namespace ustream {
          *
          * @param inF Function pointer.
          */
-        Slot(void(*inF)(args_t...));
+         //Slot(void(*inF)(args_t...));
 
-        /**
-         *@brief Construct a new slot with a lambda.
-         *
-         * @tparam F Lambda type.
-         * @param inF Lambda.
-         */
+         /**
+          *@brief Construct a new slot with a lambda.
+          *
+          * @tparam F Lambda type.
+          * @param inF Lambda.
+          */
         template <typename F>
         Slot(F&& inF);
 
     private:
-
-        void processSignal(args_t... args) override final;
-
-        template<typename Fn>
-        static void invoke(Fn&& f, args_t&&... args);
-
-        void* mObject = nullptr;
-        void(*mCallback)(void*, args_t...) = nullptr;
+        // No override of processSignal: ISlot now holds a callable. The Slot
+        // constructor simply installs the provided callable into the base.
     };
-
-    template<typename ... args_t>
-    Slot<args_t...>::Slot(void(*inF)(args_t...)) :
-        mObject(reinterpret_cast<void*>(inF)) {
-        mCallback =
-            [] (void* obj, args_t... args) {
-            reinterpret_cast<void(*)(args_t...)>(obj)(args...);
-            };
-    }
-
     template<typename ... args_t>
     template <typename F>
-    Slot<args_t...>::Slot(F&& inF) :
-        mObject(const_cast<void*>(reinterpret_cast<const void*>(std::addressof(inF)))) {
-        mCallback = [] (void* obj, args_t... args) -> void {
-            invoke(
-                *reinterpret_cast<typename std::add_pointer<F>::type>(obj),
-                std::forward<args_t>(args)...
-            );
-            };
-    }
-
-    template<typename ... args_t>
-    void Slot<args_t...>::processSignal(args_t... args) {
-        mCallback(mObject, std::forward<args_t>(args)...);
-    }
-
-    template<typename ... args_t>
-    template<typename Fn>
-    void Slot<args_t...>::invoke(Fn&& f, args_t&&... args) {
-        if constexpr (std::is_member_pointer_v<std::decay_t<Fn>>) {
-            std::mem_fn(f)(std::forward<args_t>(args)...);
-        }
-        else {
-            std::forward<Fn>(f)(std::forward<args_t>(args)...);
-        }
+    Slot<args_t...>::Slot(F&& inF) {
+        // Install the provided callable into the base ISlot handler storage.
+        this->setHandler(std::forward<F>(inF));
     }
 
 }

@@ -19,8 +19,8 @@ void connectedTest() {
             connectState = false;
         }
 
-        void processSignal(int i) override {
-            mRXData = i;
+        Slot() {
+            this->setHandler([this] (int i) { mRXData = i; });
         }
 
         int mRXData = 0;
